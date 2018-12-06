@@ -50,41 +50,59 @@ def get_ebay_listings(url, row):
 
     return totals
 
-df = pandas.read_csv('ISBN.csv')
-df['Title'] = df['Title'].str.lstrip('0123456789 ')
-df['Title'] = df['Title'].str.rstrip(' ')
-df['Title'] = df['Title'].str.replace("  "," ")
-df['Author'] = df['Author'].str.replace("  "," ")
-df['Url'] = ("https://www.ebay.it/sch/Libri-e-riviste/267/i.html?_from=R40&LH_BIN=1&LH_PrefLoc=1&_sop=15&_udhi&_nkw=")
-df['price'] = 0.
+def print_results(index, pandas_df):
+    if (pandas_df.loc[index,'price'] > 10 and pandas_df.loc[index,'price'] < 20) :
+        print(pandas_df.loc[index]);
+    elif pandas_df.loc[index,'price'] == -1. :
+        print(colored(pandas_df.loc[index], 'blue'))
+    elif pandas_df.loc[index,'price'] == 0 :
+        print(colored(pandas_df.loc[index], 'red'))
+    elif pandas_df.loc[index,'price'] < 10 :
+        print(colored(pandas_df.loc[index], 'green'))
+    else:
+        print(colored(pandas_df.loc[index], 'yellow'))
 
-for index, row in df.iterrows():
-    url = row['Url']+(row['Title'].replace(" ", "+"))+"+"+(row['Author'].replace(" ", "+"))
-    totals = get_ebay_listings(url, row);
+def print_results(pandas_df):
+    for index, row in pandas_df.iterrows():
+        if (pandas_df.loc[index,'price'] > 10 and pandas_df.loc[index,'price'] < 20) :
+            print(pandas_df.loc[index]);
+        elif pandas_df.loc[index,'price'] == -1. :
+            print(colored(pandas_df.loc[index], 'blue'))
+        elif pandas_df.loc[index,'price'] == 0 :
+            print(colored(pandas_df.loc[index], 'red'))
+        elif pandas_df.loc[index,'price'] < 10 :
+            print(colored(pandas_df.loc[index], 'green'))
+        else:
+            print(colored(pandas_df.loc[index], 'yellow'))
 
-    if len(totals) == 0:
-        url = row['Url']+(row['Title'].replace(" ", "+"))
+def retriever(csv_input_file_name, csv_output_file_name = "ebay_prices.csv"):
+    df = pandas.read_csv(csv_input_file_name)
+    df['Title'] = df['Title'].str.lstrip('0123456789 ')
+    df['Title'] = df['Title'].str.rstrip(' ')
+    df['Title'] = df['Title'].str.replace("  "," ")
+    df['Author'] = df['Author'].str.replace("  "," ")
+    df['Url'] = ("https://www.ebay.it/sch/Libri-e-riviste/267/i.html?_from=R40&LH_BIN=1&LH_PrefLoc=1&_sop=15&_udhi&_nkw=")
+    df['price'] = 0.
+
+    for index, row in df.iterrows():
+        url = row['Url']+(row['Title'].replace(" ", "+"))+"+"+(row['Author'].replace(" ", "+"))
         totals = get_ebay_listings(url, row);
-        df.loc[index,'Url'] = url+" "
-    else:
+
+        if len(totals) == 0:
+            url = row['Url']+(row['Title'].replace(" ", "+"))
+            totals = get_ebay_listings(url, row);
+
         df.loc[index,'Url'] = url+" "
 
-    l = len(totals)
-    if l > 0:
-        df.loc[index,'price'] = min(totals)
-    else:
-        df.loc[index,'price'] = -1.
+        if len(totals) > 0:
+            df.loc[index,'price'] = min(totals)
+        else:
+            df.loc[index,'price'] = -1.
 
-    if (df.loc[index,'price'] > 10 and df.loc[index,'price'] < 20) :
-        print(df.loc[index]);
-    elif df.loc[index,'price'] == -1. :
-        print(colored(df.loc[index], 'blue'))
-    elif df.loc[index,'price'] == 0 :
-        print(colored(df.loc[index], 'red'))
-    elif df.loc[index,'price'] < 10 :
-        print(colored(df.loc[index], 'green'))
-    else:
-        print(colored(df.loc[index], 'yellow'))
-    
-print(df)
-df.to_csv("ebay_prices.csv", sep=',', encoding='utf-8')
+        print_results(index, df)
+        
+    print(df)
+    df.to_csv(csv_output_file_name, sep=',', encoding='utf-8')
+
+if __name__ == "__main__":
+    retriever("ISBN.csv")
