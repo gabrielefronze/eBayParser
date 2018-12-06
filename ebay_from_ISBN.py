@@ -50,7 +50,7 @@ def get_ebay_listings(url, row):
 
     return totals
 
-def print_results(index, pandas_df):
+def print_results_id(index, pandas_df):
     if (pandas_df.loc[index,'price'] > 10 and pandas_df.loc[index,'price'] < 20) :
         print(pandas_df.loc[index]);
     elif pandas_df.loc[index,'price'] == -1. :
@@ -99,7 +99,7 @@ def retriever(csv_input_file_name, csv_output_file_name = "ebay_prices.csv"):
         else:
             df.loc[index,'price'] = -1.
 
-        print_results(index, df)
+        print_results_id(index, df)
         
     print(df)
     df.to_csv(csv_output_file_name, sep=',', encoding='utf-8')
